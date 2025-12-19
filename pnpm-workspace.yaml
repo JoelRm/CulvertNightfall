@@ -1,0 +1,5 @@
+packages:
+  - chartmaker
+  - culvert-web
+onlyBuiltDependencies:
+  - esbuild

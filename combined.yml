@@ -1,0 +1,94 @@
+services:
+  bot:
+    depends_on:
+      - db16
+      - chartmaker
+      - valkey
+    build:
+      dockerfile: Dockerfile.goapps
+      target: final-with-server-assets
+      context: .
+      args:
+        APPNAME: main
+    restart: unless-stopped
+    env_file: .env
+  chartmaker:
+    build:
+      context: .
+      dockerfile: chartmaker/Dockerfile
+      target: runner
+    restart: unless-stopped
+    init: true
+    environment:
+      - NODE_ENV=production
+    ports:
+      - 3001:3000
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    volumes:
+      - mapleculverttracker_valkey_data:/data
+    restart: unless-stopped
+    ports:
+      - 6380:6379
+  db16:
+    image: postgres:16-alpine
+    volumes:
+      - mapleculverttracker_pg16_data:/var/lib/postgresql/data
+      - ./sqlfiles:/root/sqlfiles
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 5433:5432
+  nginx:
+    depends_on:
+      - web
+      - bot
+    image: nginx:stable-alpine-slim
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+  web:
+    build:
+      dockerfile: Dockerfile.goapps
+      target: culvert-web-final
+      context: .
+      args:
+        APPNAME: staticserve
+    restart: unless-stopped
+  periodicredis:
+    depends_on:
+      - valkey
+    build:
+      dockerfile: Dockerfile.goapps
+      target: final
+      context: .
+      args:
+        APPNAME: periodicredis
+    restart: unless-stopped
+    env_file: .env
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.goapps
+      target: cron
+      args:
+        APPNAME: auto_backup
+    restart: unless-stopped
+    env_file:
+      - .env
+    init: true
+    entrypoint: sh
+    command: ["-c", "/usr/sbin/crond -f -c /etc/cron"]
+    volumes:
+      - mapleculverttracker_valkey_data:/valkey_data
+      - ./cron.d:/etc/cron
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+volumes:
+  mapleculverttracker_pg16_data:
+  mapleculverttracker_valkey_data:

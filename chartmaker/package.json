@@ -1,0 +1,35 @@
+{
+  "name": "chartmaker",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "private": true,
+  "scripts": {
+    "test": "exit 0",
+    "build": "rm -rf dist && tsc && node chartmakerBuilder.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/SLAzurin/maple-culvert-tracker.git"
+  },
+  "keywords": [
+    "maplestory",
+    "culvert"
+  ],
+  "author": "SLAzurin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SLAzurin/maple-culvert-tracker/issues"
+  },
+  "homepage": "https://github.com/SLAzurin/maple-culvert-tracker#readme",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.78"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "chart.js": "^4.5.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "express": "^5.1.0"
+  }
+}
